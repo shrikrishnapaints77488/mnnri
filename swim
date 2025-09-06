@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Swimming Game</title>
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(to bottom, #4facfe, #00f2fe);
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    h1 {
+      text-align: center;
+      color: white;
+      margin: 10px;
+    }
+
+    #gameArea {
+      position: relative;
+      width: 100%;
+      height: 500px;
+      background: linear-gradient(to bottom, #00c6ff, #0072ff);
+      overflow: hidden;
+      border: 4px solid white;
+      border-radius: 12px;
+    }
+
+    #swimmer {
+      position: absolute;
+      left: 50px;
+      top: 200px;
+      width: 50px;
+      height: 50px;
+      background: url('https://img.icons8.com/color/96/swimming.png') no-repeat center/contain;
+    }
+
+    .obstacle {
+      position: absolute;
+      right: -60px;
+      width: 60px;
+      height: 60px;
+      background: url('https://img.icons8.com/color/96/shark.png') no-repeat center/contain;
+    }
+
+    #score {
+      color: yellow;
+      font-size: 22px;
+      padding: 10px;
+    }
+
+    #gameOver {
+      display: none;
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 20px 40px;
+      border-radius: 10px;
+      font-size: 28px;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: #ff9800;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #e68900;
+    }
+  </style>
+</head>
+<body>
+  <h1>🏊 Swimming Game</h1>
+  <div id="score">Score: 0</div>
+  <div id="gameArea">
+    <div id="swimmer"></div>
+    <div id="gameOver">
+      Game Over! <br>
+      <button onclick="restartGame()">Restart</button>
+    </div>
+  </div>
+
+  <script>
+    const gameArea = document.getElementById("gameArea");
+    const swimmer = document.getElementById("swimmer");
+    const scoreDisplay = document.getElementById("score");
+    const gameOverScreen = document.getElementById("gameOver");
+
+    let swimmerY = 200;
+    let score = 0;
+    let gameInterval;
+    let obstacleInterval;
+
+    function startGame() {
+      score = 0;
+      swimmerY = 200;
+      swimmer.style.top = swimmerY + "px";
+      scoreDisplay.innerText = "Score: 0";
+      gameOverScreen.style.display = "none";
+
+      gameInterval = setInterval(updateGame, 20);
+      obstacleInterval = setInterval(createObstacle, 2000);
+    }
+
+    function updateGame() {
+      score++;
+      scoreDisplay.innerText = "Score: " + score;
+
+      let obstacles = document.getElementsByClassName("obstacle");
+      for (let i = 0; i < obstacles.length; i++) {
+        let obs = obstacles[i];
+        let obsX = parseInt(obs.style.right) || 0;
+        obs.style.right = (obsX + 5) + "px";
+
+        let obsRect = obs.getBoundingClientRect();
+        let swimRect = swimmer.getBoundingClientRect();
+
+        if (!(obsRect.right < swimRect.left || 
+              obsRect.left > swimRect.right || 
+              obsRect.bottom < swimRect.top || 
+              obsRect.top > swimRect.bottom)) {
+          endGame();
+        }
+
+        if (obsX > window.innerWidth + 60) {
+          obs.remove();
+        }
+      }
+    }
+
+    function createObstacle() {
+      let obstacle = document.createElement("div");
+      obstacle.classList.add("obstacle");
+      obstacle.style.top = Math.floor(Math.random() * 440) + "px";
+      obstacle.style.right = "0px";
+      gameArea.appendChild(obstacle);
+    }
+
+    function endGame() {
+      clearInterval(gameInterval);
+      clearInterval(obstacleInterval);
+      gameOverScreen.style.display = "block";
+    }
+
+    function restartGame() {
+      let obstacles = document.getElementsByClassName("obstacle");
+      while (obstacles[0]) {
+        obstacles[0].remove();
+      }
+      startGame();
+    }
+
+    document.addEventListener("keydown", function(event) {
+      if (event.key === "ArrowUp" && swimmerY > 0) {
+        swimmerY -= 20;
+        swimmer.style.top = swimmerY + "px";
+      } else if (event.key === "ArrowDown" && swimmerY < 450) {
+        swimmerY += 20;
+        swimmer.style.top = swimmerY + "px";
+      }
+    });
+
+    startGame();
+  </script>
+</body>
+</html>
